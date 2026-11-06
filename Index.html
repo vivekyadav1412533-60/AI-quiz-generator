@@ -1,0 +1,660 @@
+# AI-quiz-generator
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Quiz Generator</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg,#10152f,#252d64,#493b91);
+  color: white;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  padding: 25px 10px;
+}
+
+header h1 {
+  color: #62eaff;
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+
+header p {
+  color: #ddd;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: #ffffff12;
+  border: 1px solid #ffffff30;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 40px #0005;
+}
+
+h2 {
+  color: #62eaff;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin: 15px 0 8px;
+  font-weight: bold;
+}
+
+select, button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+}
+
+select {
+  background: #fff;
+  color: #222;
+}
+
+button {
+  background: #00c9ee;
+  color: #111;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: .2s;
+}
+
+button:hover {
+  background: #70eaff;
+  transform: scale(1.01);
+}
+
+.question-box {
+  background: #ffffff12;
+  padding: 20px;
+  border-radius: 14px;
+  margin-top: 20px;
+}
+
+.option {
+  background: #ffffff18;
+  padding: 14px;
+  border-radius: 10px;
+  margin-top: 12px;
+  cursor: pointer;
+  border: 1px solid #ffffff30;
+}
+
+.option:hover {
+  background: #ffffff35;
+}
+
+.option.correct {
+  background: #087b45;
+  border-color: #27ff9b;
+}
+
+.option.wrong {
+  background: #a72c3d;
+  border-color: #ff7182;
+}
+
+.option.disabled {
+  pointer-events: none;
+}
+
+#feedback {
+  margin-top: 18px;
+  line-height: 1.7;
+  padding: 14px;
+  border-radius: 10px;
+  background: #ffffff15;
+  display: none;
+}
+
+#quiz, #result {
+  display: none;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  gap: 10px;
+  text-align: center;
+}
+
+.stat {
+  background: #ffffff15;
+  padding: 15px;
+  border-radius: 12px;
+  flex: 1;
+}
+
+.stat h3 {
+  color: #62eaff;
+  font-size: 24px;
+}
+
+.ai-box {
+  background: #253b66;
+  border: 1px solid #62eaff;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 18px;
+  line-height: 1.7;
+}
+
+.small {
+  color: #ccc;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+footer {
+  text-align: center;
+  margin: 25px;
+  color: #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🤖 AI QUIZ GENERATOR</h1>
+  <p>Learn Smart • Practice More • Become Genius</p>
+</header>
+
+<div class="container">
+
+<!-- HOME PAGE -->
+<div id="home">
+  <h2>🎓 Start Your Quiz</h2>
+
+  <label>Select Your Class</label>
+  <select id="class">
+    <option value="">Choose Class</option>
+    <option>1</option><option>2</option>
+    <option>3</option><option>4</option>
+    <option>5</option><option>6</option>
+    <option>7</option><option>8</option>
+    <option>9</option><option>10</option>
+    <option>11</option><option>12</option>
+  </select>
+
+  <label>Select Your Subject</label>
+  <select id="subject">
+    <option value="">Choose Subject</option>
+    <option>Mathematics</option>
+    <option>Science</option>
+    <option>English</option>
+    <option>Hindi</option>
+    <option>Social Science</option>
+    <option>Computer</option>
+    <option>General Knowledge</option>
+  </select>
+
+  <button onclick="startQuiz()">🚀 Generate Quiz</button>
+
+  <p class="small">
+    Choose your class and subject to start practicing.
+  </p>
+</div>
+
+<!-- QUIZ PAGE -->
+<div id="quiz">
+
+  <div class="stats">
+    <div class="stat">
+      <p>Question</p>
+      <h3 id="number">1</h3>
+    </div>
+    <div class="stat">
+      <p>Correct</p>
+      <h3 id="correct">0</h3>
+    </div>
+    <div class="stat">
+      <p>Score</p>
+      <h3 id="score">0</h3>
+    </div>
+  </div>
+
+  <div class="question-box">
+    <p id="quizInfo"></p>
+    <h2 id="question">Question Here</h2>
+    <div id="options"></div>
+    <div id="feedback"></div>
+  </div>
+
+  <button id="nextBtn" onclick="nextQuestion()" style="display:none">
+    Next Question ➜
+  </button>
+
+  <button onclick="showAI()" id="aiBtn">
+    🤖 AI Tutor - Explain This Question
+  </button>
+
+  <div id="aiBox" class="ai-box" style="display:none"></div>
+
+</div>
+
+<!-- RESULT PAGE -->
+<div id="result">
+  <h2>🏆 Quiz Completed!</h2>
+  <div class="stats">
+    <div class="stat">
+      <p>Total</p>
+      <h3 id="total"></h3>
+    </div>
+    <div class="stat">
+      <p>Correct</p>
+      <h3 id="finalCorrect"></h3>
+    </div>
+    <div class="stat">
+      <p>Wrong</p>
+      <h3 id="wrong"></h3>
+    </div>
+  </div>
+
+  <h2 id="message"></h2>
+  <button onclick="location.reload()">🔄 Play Again</button>
+</div>
+
+</div>
+
+<footer>
+  © 2026 AI Quiz Generator | Learn With AI
+</footer>
+
+<script>
+
+// QUESTION DATABASE
+const database = {
+
+Mathematics: [
+{
+q:"What is 12 × 8?",
+o:["86","96","108","88"],
+a:1,
+e:"12 × 8 = 96. Multiplication means repeated addition."
+},
+{
+q:"What is the square of 9?",
+o:["18","72","81","99"],
+a:2,
+e:"9 × 9 = 81. Therefore, the square of 9 is 81."
+},
+{
+q:"What is 100 divided by 4?",
+o:["20","25","30","40"],
+a:1,
+e:"100 ÷ 4 = 25."
+},
+{
+q:"What is 15 + 25?",
+o:["30","35","40","45"],
+a:2,
+e:"15 + 25 = 40."
+},
+{
+q:"What is 7 × 7?",
+o:["42","49","56","63"],
+a:1,
+e:"7 multiplied by 7 equals 49."
+}
+],
+
+Science: [
+{
+q:"Which planet is known as the Red Planet?",
+o:["Earth","Mars","Venus","Jupiter"],
+a:1,
+e:"Mars is called the Red Planet because of iron oxide on its surface."
+},
+{
+q:"Which gas do plants absorb?",
+o:["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"],
+a:2,
+e:"Plants absorb carbon dioxide during photosynthesis."
+},
+{
+q:"What is the chemical formula of water?",
+o:["CO2","H2O","O2","NaCl"],
+a:1,
+e:"Water contains two hydrogen atoms and one oxygen atom."
+},
+{
+q:"Which organ pumps blood?",
+o:["Brain","Lungs","Heart","Kidney"],
+a:2,
+e:"The heart pumps blood throughout the human body."
+},
+{
+q:"What is the main source of energy for Earth?",
+o:["Moon","Sun","Stars","Wind"],
+a:1,
+e:"The Sun provides most of the energy that supports life on Earth."
+}
+],
+
+English: [
+{
+q:"What is the opposite of Happy?",
+o:["Joyful","Sad","Excited","Glad"],
+a:1,
+e:"Happy means feeling pleasure. Its opposite is Sad."
+},
+{
+q:"Choose the correct spelling.",
+o:["Beautifull","Beutiful","Beautiful","Butiful"],
+a:2,
+e:"The correct spelling is Beautiful."
+},
+{
+q:"What is a noun?",
+o:["Action word","Naming word","Describing word","Joining word"],
+a:1,
+e:"A noun is the name of a person, place, animal or thing."
+},
+{
+q:"What is the plural of Child?",
+o:["Childs","Childes","Children","Childrens"],
+a:2,
+e:"Children is the correct plural form of Child."
+}
+],
+
+Hindi: [
+{
+q:"हिंदी वर्णमाला में स्वर कौन सा है?",
+o:["क","ग","अ","च"],
+a:2,
+e:"अ एक स्वर है।"
+},
+{
+q:"'दिन' का विलोम शब्द क्या है?",
+o:["सुबह","रात","दोपहर","प्रकाश"],
+a:1,
+e:"दिन का विलोम शब्द रात है।"
+},
+{
+q:"संज्ञा किसे कहते हैं?",
+o:["काम बताने वाला शब्द","नाम बताने वाला शब्द","गुण बताने वाला शब्द","जोड़ने वाला शब्द"],
+a:1,
+e:"किसी व्यक्ति, वस्तु, स्थान या भाव के नाम को संज्ञा कहते हैं।"
+}
+],
+
+"Social Science": [
+{
+q:"Who is known as the Father of the Indian Constitution?",
+o:["Mahatma Gandhi","B. R. Ambedkar","Jawaharlal Nehru","Sardar Patel"],
+a:1,
+e:"Dr. B. R. Ambedkar chaired the Drafting Committee of the Indian Constitution."
+},
+{
+q:"What is the capital of India?",
+o:["Mumbai","Kolkata","New Delhi","Chennai"],
+a:2,
+e:"New Delhi is the capital of India."
+},
+{
+q:"How many houses does the Indian Parliament have?",
+o:["One","Two","Three","Four"],
+a:1,
+e:"The Indian Parliament has two houses: Lok Sabha and Rajya Sabha."
+}
+],
+
+Computer: [
+{
+q:"What does CPU stand for?",
+o:["Central Processing Unit","Computer Personal Unit","Central Program Utility","Control Processing User"],
+a:0,
+e:"CPU stands for Central Processing Unit. It processes instructions."
+},
+{
+q:"Which language is used to create web pages?",
+o:["HTML","Python only","C only","SQL"],
+a:0,
+e:"HTML is used to structure web pages."
+},
+{
+q:"What is the full form of RAM?",
+o:["Read Access Memory","Random Access Memory","Run All Memory","Real Application Memory"],
+a:1,
+e:"RAM stands for Random Access Memory."
+}
+],
+
+"General Knowledge": [
+{
+q:"Which is the largest planet in our Solar System?",
+o:["Earth","Mars","Jupiter","Venus"],
+a:2,
+e:"Jupiter is the largest planet in our Solar System."
+},
+{
+q:"How many days are there in a leap year?",
+o:["365","366","364","360"],
+a:1,
+e:"A leap year has 366 days."
+},
+{
+q:"Which is the national animal of India?",
+o:["Lion","Elephant","Tiger","Leopard"],
+a:2,
+e:"The Bengal Tiger is India's national animal."
+}
+]
+
+};
+
+// QUIZ VARIABLES
+let questions = [];
+let current = 0;
+let correct = 0;
+let wrong = 0;
+let selected = false;
+let currentQuestion = null;
+
+// START QUIZ
+function startQuiz() {
+
+  const cls = document.getElementById("class").value;
+  const subject = document.getElementById("subject").value;
+
+  if(!cls || !subject) {
+    alert("Please select your class and subject!");
+    return;
+  }
+
+  // Copy the selected subject's question bank
+  questions = [...database[subject]];
+
+  // Shuffle questions
+  questions.sort(() => Math.random() - 0.5);
+
+  current = 0;
+  correct = 0;
+  wrong = 0;
+
+  document.getElementById("home").style.display="none";
+  document.getElementById("quiz").style.display="block";
+
+  document.getElementById("quizInfo").innerText =
+    "Class " + cls + " | " + subject;
+
+  loadQuestion();
+}
+
+// LOAD QUESTION
+function loadQuestion() {
+
+  if(current >= questions.length) {
+    finishQuiz();
+    return;
+  }
+
+  selected = false;
+  currentQuestion = questions[current];
+
+  document.getElementById("number").innerText =
+    (current+1) + "/" + questions.length;
+
+  document.getElementById("correct").innerText = correct;
+  document.getElementById("score").innerText = correct * 10;
+
+  document.getElementById("question").innerText =
+    currentQuestion.q;
+
+  document.getElementById("feedback").style.display="none";
+  document.getElementById("nextBtn").style.display="none";
+  document.getElementById("aiBox").style.display="none";
+
+  document.getElementById("aiBtn").style.display="block";
+
+  let html = "";
+
+  currentQuestion.o.forEach((option,index) => {
+    html += `
+      <div class="option" onclick="checkAnswer(${index},this)">
+        ${String.fromCharCode(65+index)}. ${option}
+      </div>
+    `;
+  });
+
+  document.getElementById("options").innerHTML = html;
+}
+
+// CHECK ANSWER
+function checkAnswer(index,element) {
+
+  if(selected) return;
+
+  selected = true;
+
+  let options = document.querySelectorAll(".option");
+
+  options.forEach((op,i) => {
+    op.classList.add("disabled");
+
+    if(i === currentQuestion.a) {
+      op.classList.add("correct");
+    }
+  });
+
+  const feedback = document.getElementById("feedback");
+  feedback.style.display="block";
+
+  if(index === currentQuestion.a) {
+
+    correct++;
+
+    feedback.innerHTML =
+      "✅ <b>Correct Answer!</b><br>" +
+      "Excellent! You got 10 points.";
+
+  } else {
+
+    wrong++;
+
+    element.classList.add("wrong");
+
+    feedback.innerHTML =
+      "❌ <b>Wrong Answer!</b><br>" +
+      "Correct Answer: " +
+      currentQuestion.o[currentQuestion.a] +
+      "<br>Don't worry! Keep learning.";
+
+  }
+
+  document.getElementById("correct").innerText = correct;
+  document.getElementById("score").innerText = correct*10;
+
+  document.getElementById("nextBtn").style.display="block";
+}
+
+// AI TUTOR
+function showAI() {
+
+  const box = document.getElementById("aiBox");
+
+  box.style.display="block";
+
+  box.innerHTML = `
+    🤖 <b>AI Learning Assistant</b><br><br>
+
+    <b>Question:</b> ${currentQuestion.q}<br><br>
+
+    <b>Correct Answer:</b>
+    ${currentQuestion.o[currentQuestion.a]}<br><br>
+
+    <b>Explanation:</b><br>
+    ${currentQuestion.e}<br><br>
+
+    💡 <b>Learning Tip:</b><br>
+    इस सवाल को दोबारा पढ़ो, सही उत्तर का कारण समझो
+    और फिर इसी टॉपिक का अभ्यास करो।
+  `;
+}
+
+// NEXT QUESTION
+function nextQuestion() {
+
+  current++;
+  loadQuestion();
+
+}
+
+// FINISH QUIZ
+function finishQuiz() {
+
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("result").style.display="block";
+
+  document.getElementById("total").innerText =
+    questions.length;
+
+  document.getElementById("finalCorrect").innerText =
+    correct;
+
+  document.getElementById("wrong").innerText =
+    wrong;
+
+  let percentage = (correct/questions.length)*100;
+
+  if(percentage >= 80) {
+    document.getElementById("message").innerText =
+      "🏆 Excellent! You are a Quiz Champion!";
+  }
+  else if(percentage >= 50) {
+    document.getElementById("message").innerText =
+      "👏 Good Job! Keep Practicing!";
+  }
+  else {
+    document.getElementById("message").innerText =
+      "💪 Keep Learning! You Can Do It!";
+  }
+
+}
+
+</script>
+</body>
+</html>
